@@ -1,5 +1,30 @@
-*.xsl
-*.css
 *.class
 *.log
+*.iml
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.sbtserver
+.sbtserver.lock
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+.idea
+.idea_modules
+.DS_Store
+*.iml
+*.xsl
 *.xml
+*.css
+
+*.gpg

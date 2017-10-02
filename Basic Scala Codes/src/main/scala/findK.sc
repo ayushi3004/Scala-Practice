@@ -7,18 +7,13 @@
 
 val list=List(1, 1, 2, 3, 5, 8)
 
-val findK: (Int,List[Int], Int)=> Int = (k,l,ind) => l match {
+def findK(k:Int,l:List[Int], ind:Int=0):Option[Int] =  l match {
   case x::xs if ind!=k => findK(k,xs,ind+1)
-  case x::xs if ind==k => x
-  case _ =>
+  case x::xs if ind==k => Some(x)
+  case _ => None
 }
 
-val findEle=(n: Int, l: List[Int])=>{
-  findK(n,l,0)
-}
-
-findEle(3,list)
-
+findK(5,list).getOrElse(None)
 
 //better way
 def findN[T](n:Int,l:List[T]):T= (n, l) match{

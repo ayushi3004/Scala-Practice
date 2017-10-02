@@ -25,4 +25,19 @@ val drop2 : (Int, List[Symbol], Int) => List[Symbol] ={(num, l, ind)=> l match {
   }
 }
 
-drop2(7,l,1)
+//drop2(7,l,1)
+
+def drop3(num:Int, l:List[Symbol]): List[Symbol] ={
+    l.foldLeft((List[Symbol](),1)){
+      (a,z) =>
+        if(a._2%num==0)
+          (a._1,a._2+1)
+        else
+          (a._1:+z,a._2+1)
+    }._1
+  //or
+
+  l.zipWithIndex.filter(e => (e._2+1)%num != 0).map(_._1)
+
+}
+drop3(3,l)

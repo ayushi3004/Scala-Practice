@@ -13,7 +13,25 @@ val l= List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)
 def dedup[Int](l: List[Int]):List[Int] = l match {
   case Nil => Nil
   case x::Nil => List(x)
-  case x::xs if (x == xs.head) => dedup(xs)
+  case x::xs if x == xs.head => dedup(xs)
   case x::xs => x::dedup(xs)
 }
+
 dedup(l)
+
+// or
+def dedup2(l:List[Symbol]): List[Symbol] ={
+  if(l.isEmpty)
+    l
+  else
+    l.foldLeft(List[Symbol](l.head)){
+    (a,z) =>
+      if(z != a.head)
+        z::a
+      else
+        a
+  }.reverse
+}
+
+dedup2(l)
+dedup(List( ))

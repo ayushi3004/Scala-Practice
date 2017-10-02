@@ -15,5 +15,4 @@ def splitList(num:Int, l:List[Symbol], ind: Int=0, res:(List[Symbol],List[Symbol
   case Nil => res
 }
 
-
 splitList(3,l)

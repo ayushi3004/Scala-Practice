@@ -86,12 +86,12 @@ reverse(l)
 l.foldLeft(List.empty[Int]){ (b, a) => a :: b }
 
 /////////////////////////////////
-def factorial2(fact:Int, num:Int):Int={
-  if(num>0) factorial2(fact*num,num-1)
+def factorial2(num:Int, fact:Int=1):Int={
+  if(num>0) factorial2(num-1,fact*num)
   else fact
 }
 
-factorial2(1,5)
+factorial2(5)
 
 ///////////////////////////////
 
@@ -106,6 +106,19 @@ val drop2 : (Int, List[Symbol], Int) => List[Symbol] ={(num, l, ind)=> l match {
   }
 }
 
+def drop3(num:Int, l:List[Symbol]): List[Symbol] ={
+  l.foldLeft((List[Symbol](),1)){
+    (a,z) =>
+      if(a._2%num==0)
+        (a._1,a._2+1)
+      else
+        (a._1:+z,a._2+1)
+  }._1
+  //or
+
+  l.zipWithIndex.filter(e => (e._2+1)%num != 0).map(_._1)
+}
+drop3(3,l2)
 ////////////////////////////////////
 
 //Duplicate the elements of a list a given
@@ -141,6 +154,24 @@ def dedup[Int](l: List[Int]):List[Int] = l match {
 }
 dedup(l4)
 
+// or
+// or
+def dedup2(l:List[Symbol]): List[Symbol] ={
+  if(l.isEmpty)
+    l
+  else
+    l.foldLeft(List[Symbol](l.head)){
+      (a,z) =>
+        if(z != a.head)
+          z::a
+        else
+          a
+    }.reverse
+}
+
+dedup2(l4)
+dedup(List( ))
+
 //////////////////////////////
 
 //Extract a slice from a list.
@@ -158,6 +189,14 @@ def slice(s:Int, e:Int, l:List[Symbol]): List[Symbol] ={
   )
 }
 slice(3,7,l5)
+
+def slice2(s:Int, e:Int, li:List[Symbol], n: Int = 0, resList: List[Symbol] = List[Symbol]()): List[Symbol] = li match {
+  case x::xs if n<s | n>=e    => slice2(s,e,xs,n+1,resList)
+  case x::xs if n>=s && n<e   => slice2(s,e,xs,n+1, resList:+x)
+  case Nil => resList
+}
+slice2(3,7,l5)
+
 
 ///////////////////////////////
 
@@ -208,7 +247,14 @@ numToWords(175)
 //  scala> nth(2, List(1, 1, 2, 3, 5, 8))
 //res0: Int = 2
 val l6=List(1, 1, 2, 3, 5, 8)
+def findK(k:Int,l:List[Int], ind:Int=0):Option[Int] =  l match {
+  case x::xs if ind!=k => findK(k,xs,ind+1)
+  case x::xs if ind==k => Some(x)
+  case _ => None
+}
 
+findK(5,l6).getOrElse(None)
+//or
 def findN[T](n:Int,l:List[T]):T= (n, l) match{
   case (0,x::xs)=> x
   case (n,x::xs)=> findN(n-1,xs)
@@ -238,10 +284,8 @@ findLength(l7)
 //res0: Boolean = true
 
 val l8= List(1,2,3,3,2,1)
-val s=0
-val e=0
 
-def isPalindrome[T](l: List[T], s: Int = 0, e: Int = l.size - 1): Boolean = {
+def isPalindrome[T](l: List[T], s: Int = 0, e: Int = l8.size-1): Boolean = {
   if (s <= e) {
     if (l(s) == l(e)){
       isPalindrome(l, s + 1, e - 1)
@@ -326,6 +370,108 @@ def packCons(l:List[Symbol], inList:List[Symbol]=Nil, outList:List[List[Symbol]]
 
 packCons(l11)
 packCons(List('x,'a))
+
+
+///////////////////////////////
+//Run-length encoding of a list.
+//  Use the result of problem P09 to implement the so-called run-length
+// encoding data compression method. Consecutive duplicates of elements are encoded as
+// tuples (N, E) where N is the number of duplicates of the element E.
+//Example:
+//  scala> encode(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+//res0: List[(Int, Symbol)] = List((4,'a), (1,'b), (2,'c), (2,'a), (1,'d), (4,'e))
+
+val l12= List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)
+
+def encodeList(list:List[Symbol], inTup:Option[(Int,Symbol)]=None, outList:List[Option[(Int,Symbol)]]= Nil): List[(Int,Symbol)]= list match {
+  case x :: xs => inTup match {
+    case Some(inTup) => x match{
+      case inTup._2 => encodeList(xs, Some(inTup._1 + 1, inTup._2), outList)
+      case _ => encodeList(xs, Some(1, x), outList :+ Some(inTup))
+    }
+
+    case None => encodeList(xs, Some(1, x), outList)
+  }
+
+  case Nil => (outList :+ inTup).flatten
+}
+
+encodeList(l12)
+encodeList(List('a,'f,'a))
+encodeList(List())
+
+////////////////////////////////////////////
+//Modify the result of problem P10 in such a way that if an element has no
+// duplicates it is simply copied into the result list. Only elements with
+// duplicates are transferred as (N, E) terms.
+//Example:
+//  scala> encodeModified(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+//res0: List[Any] = List((4,'a), 'b, (2,'c), (2,'a), 'd, (4,'e))
+
+
+encodeList(l12).map{ e => if(e._1==1) e._2
+else e
+}
+
+////////////////////////////////////////
+//Decode a run-length encoded list.
+//  Given a run-length code list generated as specified in problem P10,
+// construct its uncompressed version.
+//Example:
+//  scala> decode(List((4, 'a), (1, 'b), (2, 'c), (2, 'a), (1, 'd), (4, 'e)))
+//res0: List[Symbol] = List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)
+
+encodeList(l12).flatMap{e => List.fill(e._1)(e._2)}
+
+/////////////////////////////////////
+//Rotate a list N places to the left.
+//Examples:
+//  scala> rotate(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+//res0: List[Symbol] = List('d, 'e, 'f, 'g, 'h, 'i, 'j, 'k, 'a, 'b, 'c)
+//
+//scala> rotate(-2, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+//res1: List[Symbol] = List('j, 'k, 'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i)
+
+val l13 =  List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)
+
+def rotate(places:Int, li: List[Symbol]) : List[Symbol] = {
+  val n = if(li.isEmpty) 0 else places%li.size
+
+  if(places < 0 )
+    rotate(n + li.size, li)
+  else
+    li.drop(n) ::: li.take(n)
+}
+
+rotate(3, l13)
+
+//Remove the Kth element from a list.
+//  Return the list and the removed element in a Tuple. Elements are numbered from 0.
+//Example:
+//
+//  scala> removeAt(1, List('a, 'b, 'c, 'd))
+//res0: (List[Symbol], Symbol) = (List('a, 'c, 'd),'b)
+
+val l14 = List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)
+
+def removeK(k:Int, li:List[Symbol]): (List[Symbol], Symbol) = {
+  (li.take(k) ::: li.drop(k+1), li.zipWithIndex.find(_._2==k).get._1)
+}
+
+//OR
+
+def removeK2(k:Int, li:List[Symbol]): (List[Symbol], Symbol) = (k,li) match{
+  case (_, Nil) => throw new NoSuchElementException
+  case (0, x::xs) => (xs, x)
+  case (_,x::xs) => {
+    val (resultList, removedEle) = removeK2(k-1, xs)
+    (x::resultList, removedEle)
+  }
+}
+
+removeK(5,l14)
+removeK2(3,l14)
+
 
 
 

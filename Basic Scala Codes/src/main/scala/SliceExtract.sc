@@ -13,3 +13,10 @@ def slice(s:Int, e:Int, l:List[Symbol]): List[Symbol] ={
   )
 }
 slice(3,7,l)
+
+def slice2(s:Int, e:Int, li:List[Symbol], n: Int = 0, resList: List[Symbol] = List[Symbol]()): List[Symbol] = li match {
+  case x::xs if n<s | n>=e    => slice2(s,e,xs,n+1,resList)
+  case x::xs if n>=s && n<e   => slice2(s,e,xs,n+1, resList:+x)
+  case Nil => resList
+}
+slice2(3,7,l)

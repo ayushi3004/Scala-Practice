@@ -6,9 +6,9 @@
 //factorial(4)
 
 //TAIL RECURSION
-def factorial2(fact:Int, num:Int):Int={
-  if(num>0) factorial2(fact*num,num-1)
+def factorial2(num:Int, fact:Int=1):Int={
+  if(num>0) factorial2(num-1,fact*num)
   else fact
 }
 
-factorial2(1,5)
+factorial2(5)

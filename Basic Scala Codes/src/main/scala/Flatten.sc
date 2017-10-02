@@ -5,12 +5,10 @@
 
 val l=List(List(1, 1), 2, List(3, List(5, 8)))
 
-def flatten(l:List[Any]):List[Any]={
+def flatten2(l:List[Any]):List[Any]={
   l.flatMap(_ match {
-    case l1:List[Any] => flatten(l1)
+    case l1:List[Any] => flatten2(l1)
     case s:Int => List(s)
   })
 }
-flatten(l)
-
-
+flatten2(l)
